@@ -58,6 +58,11 @@ cc_defaults {
             "-DARR_USE_OPLUS_LTPO_REFRESH_RATES=1",
         ],
         default: [],
+    }) + select(soong_config_variable("surfaceflinger", "vrr_injection_mock"), {
+        any @ value: [
+            "-DINJECT_MOCK_VRR_HAL=1",
+        ],
+        default: [],
     }),
 }
 
