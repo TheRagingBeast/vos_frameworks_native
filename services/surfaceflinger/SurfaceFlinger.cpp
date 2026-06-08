@@ -3970,7 +3970,7 @@ std::pair<DisplayModes, DisplayModePtr> SurfaceFlinger::loadDisplayModes(
         auto vrrConfig = hwcMode.vrrConfig;
 
 #ifdef INJECT_MOCK_VRR_HAL
-    if (!vrrConfig.has_value() && hwcMode.vsyncPeriod < 10000000) {
+    if (!vrrConfig.has_value()) {
             using VrrConfigType = decltype(hwcMode.vrrConfig)::value_type;
             VrrConfigType mockVrr;
             mockVrr.minFrameIntervalNs = hwcMode.vsyncPeriod;

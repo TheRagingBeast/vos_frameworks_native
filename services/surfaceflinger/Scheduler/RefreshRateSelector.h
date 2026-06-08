@@ -77,7 +77,7 @@ public:
 #ifdef FRAME_RATE_CATEGORY_MIN
     static constexpr Fps kMinSupportedFrameRate = intToFps(FRAME_RATE_CATEGORY_MIN);
 #else
-    static constexpr Fps kMinSupportedFrameRate = 20_Hz;
+    static constexpr Fps kMinSupportedFrameRate = 10_Hz;
 #endif
 
     // Start range for FrameRateCategory Normal and High.
@@ -573,7 +573,7 @@ private:
     std::vector<FrameRateMode> mAllFrameRates GUARDED_BY(mLock);
 
     // Caches whether the display is VRR-compatible based on the active display mode.
-    std::atomic_bool mIsVrrDisplay = false;
+    std::atomic_bool mIsVrrDisplay = true;
 
     Policy mDisplayManagerPolicy GUARDED_BY(mLock);
     std::optional<Policy> mOverridePolicy GUARDED_BY(mLock);
