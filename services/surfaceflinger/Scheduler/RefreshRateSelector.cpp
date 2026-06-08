@@ -808,10 +808,9 @@ auto RefreshRateSelector::getRankedFrameRatesLocked(const std::vector<LayerRequi
         return {ranking, GlobalSignals{.idle = true}};
     }
 
-    // LMO Edit: If there are no layers, prefer to stay with the current config
     if (layers.empty() || noVoteLayers == layers.size()) {
         ALOGV("No layers with votes");
-        const auto ranking = rankFrameRates(anchorGroup, RefreshRateOrder::Ascending, activeMode.getId());
+        const auto ranking = rankFrameRates(anchorGroup, RefreshRateOrder::Descending);
         SFTRACE_FORMAT_INSTANT("%s (No layers with votes)",
                                to_string(ranking.front().frameRateMode.fps).c_str());
         return {ranking, kNoSignals};
