@@ -786,17 +786,14 @@ auto RefreshRateSelector::getRankedFrameRatesLocked(const std::vector<LayerRequi
     // rate.
     if (!signals.touch && signals.idle &&
         !(policy->primaryRangeIsSingleRate() && hasExplicitVoteLayers)) {
-        ALOGV("Idle");
         const auto idleAnchorGroup = activeMode.getGroup();
-        auto idleBestMode = mPrimaryFrameRates.end();
-        for (auto it = mPrimaryFrameRates.begin(); it != mPrimaryFrameRates.end(); ++it) {
-            if (it->modePtr->getGroup() != idleAnchorGroup) continue;
-            if (isStrictlyLess(it->fps, kMinSupportedFrameRate)) continue;
-            if (idleBestMode == mPrimaryFrameRates.end() ||
-                isStrictlyLess(it->fps, idleBestMode->fps)) {
-                idleBestMode = it;
-            }
-        }
+        // mPrimaryFrameRates is sorted ascending; first match is the minimum valid rate.
+        const auto idleBestMode = std::ranges::find_if(mPrimaryFrameRates,
+                [idleAnchorGroup](const auto& m) {
+                    return m.modePtr->getGroup() == idleAnchorGroup &&
+                           !isStrictlyLess(m.fps, kMinSupportedFrameRate);
+                });
+
         FrameRateRanking ranking;
         if (idleBestMode != mPrimaryFrameRates.end()) {
             constexpr float kMaxScore = std::numeric_limits<float>::max();
@@ -804,21 +801,17 @@ auto RefreshRateSelector::getRankedFrameRatesLocked(const std::vector<LayerRequi
         } else {
             ranking = rankFrameRates(idleAnchorGroup, RefreshRateOrder::Ascending);
         }
-        SFTRACE_FORMAT_INSTANT("%s (Idle)", to_string(ranking.front().frameRateMode.fps).c_str());
         return {ranking, GlobalSignals{.idle = true}};
     }
 
     if (layers.empty() || noVoteLayers == layers.size()) {
         ALOGV("No layers with votes");
-        auto noVoteBestMode = mPrimaryFrameRates.end();
-        for (auto it = mPrimaryFrameRates.begin(); it != mPrimaryFrameRates.end(); ++it) {
-            if (it->modePtr->getGroup() != anchorGroup) continue;
-            if (isStrictlyLess(it->fps, kMinSupportedFrameRate)) continue;
-            if (noVoteBestMode == mPrimaryFrameRates.end() ||
-                isStrictlyLess(it->fps, noVoteBestMode->fps)) {
-                noVoteBestMode = it;
-            }
-        }
+        // mPrimaryFrameRates is sorted ascending; first match is the minimum valid rate.
+        const auto noVoteBestMode = std::ranges::find_if(mPrimaryFrameRates,
+                [anchorGroup](const auto& m) {
+                    return m.modePtr->getGroup() == anchorGroup &&
+                           !isStrictlyLess(m.fps, kMinSupportedFrameRate);
+                });
         FrameRateRanking ranking;
         if (noVoteBestMode != mPrimaryFrameRates.end()) {
             constexpr float kMaxScore = std::numeric_limits<float>::max();
@@ -826,8 +819,6 @@ auto RefreshRateSelector::getRankedFrameRatesLocked(const std::vector<LayerRequi
         } else {
             ranking = rankFrameRates(anchorGroup, RefreshRateOrder::Descending);
         }
-        SFTRACE_FORMAT_INSTANT("%s (No layers with votes)",
-                               to_string(ranking.front().frameRateMode.fps).c_str());
         return {ranking, kNoSignals};
     }
 
@@ -1100,13 +1091,9 @@ auto RefreshRateSelector::getRankedFrameRatesLocked(const std::vector<LayerRequi
         ALOGV("preferredDisplayMode");
         const auto ascendingWithPreferred =
                 rankFrameRates(anchorGroup, RefreshRateOrder::Ascending, activeMode.getId());
-        SFTRACE_FORMAT_INSTANT("%s (preferredDisplayMode)",
-                               to_string(ascendingWithPreferred.front().frameRateMode.fps).c_str());
         return {ascendingWithPreferred, kNoSignals};
     }
 
-    ALOGV("%s (scored)", to_string(ranking.front().frameRateMode.fps).c_str());
-    SFTRACE_FORMAT_INSTANT("%s (scored)", to_string(ranking.front().frameRateMode.fps).c_str());
     return {ranking, kNoSignals};
 }
 
