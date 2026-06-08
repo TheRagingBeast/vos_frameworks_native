@@ -907,18 +907,7 @@ auto RefreshRateSelector::getRankedFrameRatesLocked(const std::vector<LayerRequi
                 continue;
             }
 
-            float layerScore;
-            if (layer.vote == LayerVoteType::Heuristic && signals.heuristicIdle
-                    && isStrictlyLess(60_Hz, fps)) {
-                // Time for heuristic layer to keep using high refresh rate has expired
-                layerScore = 0;
-                localIsIdle = true;
-                ALOGV("%s expired to keep using %s", formatLayerInfo(layer, weight).c_str(),
-                      to_string(fps).c_str());
-            } else {
-                layerScore =
-                    calculateLayerScoreLocked(layer, fps, isSeamlessSwitch);
-            }
+            const float layerScore = calculateLayerScoreLocked(layer, fps, isSeamlessSwitch);
             const float weightedLayerScore = weight * layerScore;
 
             // Layer with fixed source has a special consideration which depends on the

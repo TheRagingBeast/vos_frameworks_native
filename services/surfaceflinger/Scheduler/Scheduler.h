@@ -418,7 +418,6 @@ private:
     void idleTimerCallback(PhysicalDisplayId, TimerState);
     void touchTimerCallback(TimerState);
     void displayPowerTimerCallback(PhysicalDisplayId, TimerState);
-    void heuristicIdleTimerCallback(TimerState);
 
     // VsyncSchedule delegate.
     void onHardwareVsyncRequest(PhysicalDisplayId, bool enable);
@@ -568,10 +567,6 @@ private:
 
     bool mShouldStartPowerTimers GUARDED_BY(kMainThreadContext) = false;
 
-    // Timer used to enter idle refresh rate in heuristic layers.
-    std::optional<OneShotTimer> mHeuristicIdleTimer;
-    static constexpr std::chrono::milliseconds HEURISTIC_TIMEOUT = 3000ms;
-
     // Injected delay prior to compositing, for simulating jank.
     float mPacesetterFrameDurationFractionToSkip GUARDED_BY(kMainThreadContext) = 0.f;
 
@@ -663,7 +658,6 @@ private:
         // Policy for choosing the display mode.
         LayerHistory::Summary contentRequirements;
         ui::PhysicalDisplayMap<PhysicalDisplayId, TimerState> idleTimers;
-        TimerState heuristicIdleTimer = TimerState::Reset;
         TouchState touch = TouchState::Inactive;
         ui::PhysicalDisplayMap<PhysicalDisplayId, TimerState> displayPowerTimers;
         ui::PhysicalDisplayMap<PhysicalDisplayId, hal::PowerMode> displayPowerModes;

@@ -77,7 +77,6 @@ Scheduler::~Scheduler() {
     // Stop timers and wait for their threads to exit.
     mDisplayPowerTimers.clear();
     mTouchTimer.reset();
-    mHeuristicIdleTimer.reset();
 
     // Stop idle timer and clear callbacks, as the RefreshRateSelector may outlive the Scheduler.
     demotePacesetterDisplay(
@@ -1102,9 +1101,6 @@ void Scheduler::onTouchHint() {
         mTouchTimer->reset();
         pacesetterSelectorPtr()->resetKernelIdleTimer();
     }
-    if (mHeuristicIdleTimer) {
-        mHeuristicIdleTimer->reset();
-    }
 }
 
 bool Scheduler::setDisplayPowerMode(PhysicalDisplayId id, hal::PowerMode powerMode) {
@@ -1210,11 +1206,6 @@ void Scheduler::kernelIdleTimerCallback(PhysicalDisplayId displayId, TimerState 
 void Scheduler::idleTimerCallback(PhysicalDisplayId displayId, TimerState state) {
     applyPolicy(&Policy::idleTimers, state, displayId);
     SFTRACE_INT("ExpiredIdleTimer", static_cast<int>(state));
-}
-
-void Scheduler::heuristicIdleTimerCallback(TimerState state) {
-    applyPolicy(&Policy::heuristicIdleTimer, state);
-    ALOGV("%s: TimerState %d", __func__, static_cast<int>(state));
 }
 
 void Scheduler::touchTimerCallback(TimerState state) {
@@ -1409,13 +1400,6 @@ std::shared_ptr<VsyncSchedule> Scheduler::promotePacesetterDisplayLocked(
 
             pacesetter.selectorPtr->startIdleTimer();
         }
-
-        mHeuristicIdleTimer.emplace(
-                "heuristicIdleTimer",
-                std::max(HEURISTIC_TIMEOUT, pacesetter.selectorPtr->getIdleTimerTimeout()),
-                [this] { heuristicIdleTimerCallback(TimerState::Reset); },
-                [this] { heuristicIdleTimerCallback(TimerState::Expired); });
-        mHeuristicIdleTimer->start();
 
         newVsyncSchedulePtr = pacesetter.schedulePtr;
 
@@ -1743,8 +1727,7 @@ GlobalSignals Scheduler::makeGlobalSignals(PhysicalDisplayId displayId) const {
 
     return {.touch = mTouchTimer && mPolicy.touch == TouchState::Active,
             .idle = displayIdle,
-            .powerOnImminent = powerOnImminent,
-            .heuristicIdle = mPolicy.heuristicIdleTimer == TimerState::Expired};
+            .powerOnImminent = powerOnImminent};
 }
 
 FrameRateMode Scheduler::getPreferredDisplayMode() {
