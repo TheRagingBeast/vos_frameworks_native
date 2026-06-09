@@ -95,6 +95,16 @@ public:
     binder::Status snapshotAppData(const std::optional<std::string>& volumeUuid,
             const std::string& packageName, const int32_t user, const int32_t snapshotId,
             int32_t storageFlags, int64_t* _aidl_return);
+    binder::Status tarAppData(const std::optional<std::string>& uuid,
+            const std::string& packageName, int32_t userId, int32_t storageFlags,
+            const ::android::os::ParcelFileDescriptor& outFd, bool excludeCache);
+    binder::Status untarAppDataExternal(const std::optional<std::string>& uuid,
+            const std::string& packageName, int32_t userId,
+            const ::android::os::ParcelFileDescriptor& inFd);
+    binder::Status untarAppData(const std::optional<std::string>& uuid,
+            const std::string& packageName, int32_t userId, int32_t storageFlags,
+            int32_t appId, const std::string& seInfo,
+            const ::android::os::ParcelFileDescriptor& inFd);
     binder::Status restoreAppDataSnapshot(const std::optional<std::string>& volumeUuid,
             const std::string& packageName, const int32_t appId, const std::string& seInfo,
             const int32_t user, const int32_t snapshotId, int32_t storageFlags);

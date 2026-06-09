@@ -115,6 +115,13 @@ interface IInstalld {
 
     long snapshotAppData(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
             int userId, int snapshotId, int storageFlags);
+    void tarAppData(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
+            int userId, int storageFlags, in ParcelFileDescriptor outFd, boolean excludeCache);
+    void untarAppDataExternal(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
+            int userId, in ParcelFileDescriptor inFd);
+    void untarAppData(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
+            int userId, int storageFlags, int appId, @utf8InCpp String seInfo,
+            in ParcelFileDescriptor inFd);
     void restoreAppDataSnapshot(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
             int appId, @utf8InCpp String seInfo, int user, int snapshotId, int storageflags);
     void destroyAppDataSnapshot(@nullable @utf8InCpp String uuid, @utf8InCpp String packageName,
