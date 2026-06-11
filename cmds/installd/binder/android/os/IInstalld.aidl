@@ -115,13 +115,22 @@ interface IInstalld {
 
     long snapshotAppData(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
             int userId, int snapshotId, int storageFlags);
+    // Tar both CE and DE data dirs into a single archive on outFd.
+    // Archive layout: ce/<files...>  de/<files...>
     void tarAppData(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
-            int userId, int storageFlags, in ParcelFileDescriptor outFd, boolean excludeCache);
-    void untarAppDataExternal(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
-            int userId, in ParcelFileDescriptor inFd);
+            int userId, in ParcelFileDescriptor outFd, boolean excludeCache);
+    // Restore CE+DE data from a backup.tar produced by tarAppData.
     void untarAppData(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
-            int userId, int storageFlags, int appId, @utf8InCpp String seInfo,
+            int userId, int appId, @utf8InCpp String seInfo,
             in ParcelFileDescriptor inFd);
+    // Read a fully-assembled .vbak archive from inFd and write it to
+    // /data/media/<userId>/AppDataBackup/<archiveId>.vbak.
+    // system_server never touches /data/media directly; installd owns the write.
+    void publishBackupArchive(int userId, @utf8InCpp String archiveId,
+            in ParcelFileDescriptor inFd);
+    // Delete /data/media/<userId>/AppDataBackup/<archiveId>.vbak.
+    // installd owns the unlink so system_server needs no media_rw_data_file unlink.
+    void deleteBackupArchive(int userId, @utf8InCpp String archiveId);
     void restoreAppDataSnapshot(@nullable @utf8InCpp String uuid, in @utf8InCpp String packageName,
             int appId, @utf8InCpp String seInfo, int user, int snapshotId, int storageflags);
     void destroyAppDataSnapshot(@nullable @utf8InCpp String uuid, @utf8InCpp String packageName,

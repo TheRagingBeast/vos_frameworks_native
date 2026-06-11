@@ -96,15 +96,15 @@ public:
             const std::string& packageName, const int32_t user, const int32_t snapshotId,
             int32_t storageFlags, int64_t* _aidl_return);
     binder::Status tarAppData(const std::optional<std::string>& uuid,
-            const std::string& packageName, int32_t userId, int32_t storageFlags,
-            const ::android::os::ParcelFileDescriptor& outFd, bool excludeCache);
-    binder::Status untarAppDataExternal(const std::optional<std::string>& uuid,
             const std::string& packageName, int32_t userId,
-            const ::android::os::ParcelFileDescriptor& inFd);
+            const ::android::os::ParcelFileDescriptor& outFd, bool excludeCache);
     binder::Status untarAppData(const std::optional<std::string>& uuid,
-            const std::string& packageName, int32_t userId, int32_t storageFlags,
+            const std::string& packageName, int32_t userId,
             int32_t appId, const std::string& seInfo,
             const ::android::os::ParcelFileDescriptor& inFd);
+    binder::Status publishBackupArchive(int32_t userId, const std::string& archiveId,
+            const ::android::os::ParcelFileDescriptor& inFd);
+    binder::Status deleteBackupArchive(int32_t userId, const std::string& archiveId);
     binder::Status restoreAppDataSnapshot(const std::optional<std::string>& volumeUuid,
             const std::string& packageName, const int32_t appId, const std::string& seInfo,
             const int32_t user, const int32_t snapshotId, int32_t storageFlags);
